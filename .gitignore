@@ -1,0 +1,7 @@
+node_modules/
+.dockerignore
+.git/
+package-lock.json
+admin_backend.log
+credentials
+.env
