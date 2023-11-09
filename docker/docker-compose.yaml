@@ -1,0 +1,55 @@
+version: "3.0"
+name: "discord_bot_administrator"
+volumes:
+  administrationdb:
+
+services:
+
+  client:
+    container_name: client_server
+    restart: always
+    build: ../client
+    environment: 
+      API_URL: http://backend:9090/api
+      BOT_TOKEN: ${BOT_TOKEN}
+    depends_on:
+      - backend
+
+  backend:
+    container_name: backend_server
+    build: ../backend
+    restart: always
+    ports:
+      - "9090:9090"
+    environment:
+      DATABASE_URL: postgres://user:password@db/adminstrationbotdb
+    depends_on:
+      - db
+
+  db:
+    container_name: postgres_db
+    image: postgres:13.6
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: adminstrationbotdb
+    volumes:
+      - administrationdb:/var/lib/postgresql/data
+
+  flyway:
+    container_name: flyway
+    image: flyway/flyway:9.22.2
+    command:
+      -url=jdbc:postgresql://db:5432/adminstrationbotdb
+      -schemas=public
+      -user=user
+      -password=password
+      -connectRetries=60
+        migrate
+    volumes: 
+      - ../database/migration:/flyway/sql
+    depends_on:
+      - db
