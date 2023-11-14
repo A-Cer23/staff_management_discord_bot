@@ -25,15 +25,11 @@ func main() {
 
 	portNumber := os.Getenv("PORT_NUMBER")
 	if len(portNumber) == 0 {
-		// err := errors.New(`"PORT_NUMBER" missing from .env file`)
-		// log.Fatal().Err(err).Send()
 		portNumber = defaultPortNumber
 	}
 
 	dbUrl := os.Getenv("DATABASE_URL")
 	if len(dbUrl) == 0 {
-		// err := errors.New(`"DATABASE_URL" missing from .env file`)
-		// log.Fatal().Err(err).Send()
 		dbUrl = defaultDatabaseURL
 	}
 

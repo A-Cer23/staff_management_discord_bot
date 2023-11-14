@@ -1,3 +1,6 @@
+const logger = require('../utlis/logger.js')
+
+
 const GUILD_URL = process.env.API_URL + "/guild"
 
 const createGuild = async (guild_id, owner_id, guild_name, joined_at) => {
@@ -21,9 +24,11 @@ const createGuild = async (guild_id, owner_id, guild_name, joined_at) => {
 
     const request = new Request(GUILD_URL, options);
 
+    logger.info(`Sending create guild request for Guild ID: ${guild_id}`)
 
     fetch(request)
-    // TODO: check if response is not 201. if its not 201 then log the error
+        .then(res => res.json())
+        .then(jsonResponse => logger.info(JSON.stringify(jsonResponse)))
 }
 
 GuildService = {

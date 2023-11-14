@@ -12,6 +12,7 @@ import (
 
 const (
 	insertGuildQuery = "INSERT INTO guild (guild_id, owner_id, guild_name, joined_at, in_guild) VALUES ($1, $2, $3, $4, $5)"
+	GuildExistsQuery = "SELECT COUNT(*) FROM guild WHERE guild_id = $1"
 )
 
 func CreateGuild(c *gin.Context, db *pgxpool.Pool) {
@@ -22,20 +23,34 @@ func CreateGuild(c *gin.Context, db *pgxpool.Pool) {
 		return
 	}
 
-	log.Info().Str("GuildID", guild.GuildID).Msg("Creating new guild")
+	var rowCount int
 
-	_, err := db.Exec(
-		context.Background(),
-		insertGuildQuery,
-		guild.GuildID, guild.OwnerID, guild.GuildName, guild.JoinedAt, guild.InGuild,
-	)
+	err := db.QueryRow(context.Background(), GuildExistsQuery, guild.GuildID).Scan(&rowCount)
 
 	if err != nil {
-		log.Error().Msg(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Problem creating guild", "guild_id": guild.GuildID})
-	} else {
-		log.Info().Str("GuildID", guild.GuildID).Msg("Guild created")
-		c.JSON(http.StatusCreated, gin.H{"message": "Guild created successfully"})
+		log.Error().Err(err).Msg("Error in guild query row")
 	}
 
+	if rowCount == 0 {
+		log.Info().Str("GuildID", guild.GuildID).Msg("Creating new guild")
+
+		_, err := db.Exec(
+			context.Background(),
+			insertGuildQuery,
+			guild.GuildID, guild.OwnerID, guild.GuildName, guild.JoinedAt, guild.InGuild,
+		)
+
+		if err != nil {
+			log.Error().Msg(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Problem creating guild", "guild_id": guild.GuildID})
+			return
+		} else {
+			log.Info().Str("GuildID", guild.GuildID).Msg("Guild created")
+			c.JSON(http.StatusCreated, gin.H{"message": "Guild created successfully"})
+			return
+		}
+	} else {
+		log.Info().Str("GuildID", guild.GuildID).Msg("Guild already exists")
+		c.JSON(http.StatusConflict, gin.H{"error": "Guild already exsists"})
+	}
 }
