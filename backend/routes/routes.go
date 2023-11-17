@@ -14,6 +14,9 @@ func SetupRoutes(router *gin.Engine, db *pgxpool.Pool) {
 			guild.POST("/", func(c *gin.Context) {
 				handlers.CreateGuild(c, db)
 			})
+			guild.PUT("/:id", func(c *gin.Context) {
+				handlers.LeaveGuild(c, db)
+			})
 		}
 	}
 }
