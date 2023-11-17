@@ -24,15 +24,45 @@ const createGuild = async (guild_id, owner_id, guild_name, joined_at) => {
 
     const request = new Request(GUILD_URL, options);
 
-    logger.info(`Sending create guild request for Guild ID: ${guild_id}`)
+    logger.info(`Joining Guild ID: ${guild_id}`)
 
     fetch(request)
-        .then(res => res.json())
-        .then(jsonResponse => logger.info(JSON.stringify(jsonResponse)))
+        .then(res => {
+            if (!res.ok) {
+                logger.error(`Guild create response was not okay \nResponse: ${res.statusText}`)
+                return
+            }
+            logger.info(`Joined Guild ID: ${guild_id}`)
+        })
+}
+
+
+const leaveGuild = (guild_id) => {
+    const options = {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    }
+
+    const request = new Request(GUILD_URL + `/${guild_id}`, options)
+
+    logger.info(`Leaving Guild ID: ${guild_id}`)
+
+    fetch(request)
+        .then(res => {
+            if (!res.ok) {
+                logger.error(`Leaving guild response was not okay \nResponse: ${res.statusText}`)
+                return
+            }
+            logger.info(`Left Guild ID: ${guild_id}`)
+        })
+
 }
 
 GuildService = {
     createGuild,
+    leaveGuild
 }
 
 module.exports = GuildService
